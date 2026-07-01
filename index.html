@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Banner Generator</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #1a1a1a;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    padding: 24px 16px;
+    font-family: Arial, sans-serif;
+    gap: 20px;
+  }
+  h2 { color: #fff; font-size: 18px; font-weight: 700; }
+  .subtitle { color: #888; font-size: 13px; }
+
+  .platforms {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+  }
+  .platform-btn {
+    background: #2a2a2a;
+    border: 2px solid #333;
+    color: #ccc;
+    padding: 10px 18px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    text-align: center;
+    transition: all 0.2s;
+    min-width: 130px;
+  }
+  .platform-btn:hover { border-color: #FF6B35; color: #FF6B35; }
+  .platform-btn.active { background: #FF6B35; border-color: #FF6B35; color: #fff; }
+  .platform-btn small { display: block; font-weight: 400; font-size: 11px; opacity: 0.75; margin-top: 2px; }
+
+  .canvas-wrap {
+    width: 100%;
+    max-width: 860px;
+    overflow-x: auto;
+    display: flex;
+    justify-content: center;
+  }
+  canvas {
+    max-width: 100%;
+    height: auto;
+    border-radius: 6px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.6);
+    display: block;
+  }
+
+  .dl-btn {
+    background: #FF6B35;
+    color: white;
+    border: none;
+    padding: 14px 40px;
+    font-size: 15px;
+    font-weight: 700;
+    border-radius: 30px;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+  }
+  .info { color: #555; font-size: 12px; text-align: center; line-height: 1.9; }
+  #dim-label { color: #FF6B35; font-size: 13px; font-weight: 600; }
+</style>
+</head>
+<body>
+
+<h2>Cover Banner Generator</h2>
+<p class="subtitle">Select a platform then download</p>
+
+<div class="platforms">
+  <div class="platform-btn active" onclick="select('linkedin')">
+    LinkedIn
+    <small>1584 × 396 px</small>
+  </div>
+  <div class="platform-btn" onclick="select('facebook')">
+    Facebook
+    <small>820 × 312 px</small>
+  </div>
+  <div class="platform-btn" onclick="select('x_header')">
+    X / Twitter Header
+    <small>1500 × 500 px</small>
+  </div>
+  <div class="platform-btn" onclick="select('x_profile')">
+    X Profile Photo
+    <small>400 × 400 px</small>
+  </div>
+</div>
+
+<span id="dim-label">1584 × 396 px</span>
+
+<div class="canvas-wrap">
+  <canvas id="banner"></canvas>
+</div>
+
+<button class="dl-btn" onclick="download()">⬇ Download PNG</button>
+
+<p class="info" id="info-text">LinkedIn cover · Upload under Profile → Edit → Background photo</p>
+
+<script>
+const PLATFORMS = {
+  linkedin:  { w: 1584, h: 396,  label: 'LinkedIn cover · Upload under Profile → Edit → Background photo' },
+  facebook:  { w: 820,  h: 312,  label: 'Facebook cover · Upload under your profile cover area' },
+  x_header:  { w: 1500, h: 500,  label: 'X/Twitter header · Upload under Profile → Edit profile → Header' },
+  x_profile: { w: 400,  h: 400,  label: 'X Profile photo · Square format · Upload under Edit profile → Avatar' },
+};
+
+let current = 'linkedin';
+const canvas = document.getElementById('banner');
+const ctx = canvas.getContext('2d');
+
+function select(key) {
+  current = key;
+  document.querySelectorAll('.platform-btn').forEach((b, i) => {
+    b.classList.toggle('active', Object.keys(PLATFORMS)[i] === key);
+  });
+  document.getElementById('dim-label').textContent =
+    `${PLATFORMS[key].w} × ${PLATFORMS[key].h} px`;
+  document.getElementById('info-text').textContent = PLATFORMS[key].label;
+  drawBanner(key);
+}
+
+function pill(ctx, x, y, w, h, r, fill) {
+  ctx.fillStyle = fill;
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+  ctx.fill();
+}
+
+function outlinePill(ctx, x, y, w, h, r, color) {
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+  ctx.stroke();
+}
+
+function drawBanner(key) {
+  const { w, h } = PLATFORMS[key];
+  canvas.width = w;
+  canvas.height = h;
+
+  if (key === 'x_profile') {
+    drawSquare(w, h);
+  } else {
+    drawHorizontal(w, h, key);
+  }
+}
+
+function drawSquare(W, H) {
+  // Gradient background
+  const bg = ctx.createLinearGradient(0, 0, W, H);
+  bg.addColorStop(0, '#FF7A45');
+  bg.addColorStop(1, '#FF4500');
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, W, H);
+
+  // Decorative circles
+  ctx.beginPath();
+  ctx.arc(W * 0.85, H * 0.15, 90, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(255,255,255,0.08)';
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.arc(W * 0.1, H * 0.85, 70, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(255,255,255,0.07)';
+  ctx.fill();
+
+  // Initials
+  ctx.fillStyle = 'rgba(255,255,255,0.12)';
+  ctx.font = `bold ${W * 0.55}px Arial`;
+  ctx.textAlign = 'center';
+  ctx.fillText('MM', W / 2, H * 0.62);
+
+  // Name
+  ctx.fillStyle = '#FFFFFF';
+  ctx.font = `bold ${W * 0.1}px Arial`;
+  ctx.textAlign = 'center';
+  ctx.fillText('MTHOKOZISI', W / 2, H * 0.48);
+  ctx.font = `bold ${W * 0.12}px Arial`;
+  ctx.fillText('MASOMBUKA', W / 2, H * 0.62);
+
+  // Role
+  ctx.fillStyle = 'rgba(255,255,255,0.82)';
+  ctx.font = `400 ${W * 0.055}px Arial`;
+  ctx.fillText('Business Intelligence', W / 2, H * 0.74);
+  ctx.fillText('Cloud · AI · BI Graduate', W / 2, H * 0.84);
+
+  // Bottom bar
+  ctx.fillStyle = 'rgba(0,0,0,0.18)';
+  ctx.fillRect(0, H - H * 0.06, W, H * 0.06);
+  ctx.fillStyle = 'rgba(255,255,255,0.6)';
+  ctx.font = `400 ${W * 0.04}px Arial`;
+  ctx.fillText('99masombuka@gmail.com', W / 2, H - H * 0.02);
+
+  ctx.textAlign = 'left';
+}
+
+function drawHorizontal(W, H, key) {
+  const scale = H / 396;
+  const splitX = Math.round(570 * (W / 1584));
+  const splitX2 = Math.round(630 * (W / 1584));
+  const RX = Math.round(690 * (W / 1584));
+
+  // White/cream right bg
+  ctx.fillStyle = '#FFF8F5';
+  ctx.fillRect(0, 0, W, H);
+
+  // Left coral panel
+  const leftGrad = ctx.createLinearGradient(0, 0, splitX, H);
+  leftGrad.addColorStop(0, '#FF7A45');
+  leftGrad.addColorStop(1, '#FF4500');
+  ctx.fillStyle = leftGrad;
+  ctx.beginPath();
+  ctx.moveTo(0, 0);
+  ctx.lineTo(splitX, 0);
+  ctx.lineTo(splitX2, H);
+  ctx.lineTo(0, H);
+  ctx.closePath();
+  ctx.fill();
+
+  // Accent stripe
+  ctx.fillStyle = 'rgba(255,160,100,0.4)';
+  ctx.beginPath();
+  ctx.moveTo(splitX - 20, 0);
+  ctx.lineTo(splitX + 20, 0);
+  ctx.lineTo(splitX2 + 20, H);
+  ctx.lineTo(splitX2 - 20, H);
+  ctx.closePath();
+  ctx.fill();
+
+  // Decorative circles
+  ctx.beginPath();
+  ctx.arc(50 * scale, H - 40, 120 * scale, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(255,255,255,0.07)';
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.arc(splitX - 80 * scale, 30 * scale, 75 * scale, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(255,255,255,0.07)';
+  ctx.fill();
+
+  // Dot grid
+  ctx.fillStyle = 'rgba(255,255,255,0.18)';
+  for (let row = 0; row < 4; row++) {
+    for (let col = 0; col < 4; col++) {
+      ctx.beginPath();
+      ctx.arc((310 + col * 20) * scale, (55 + row * 20) * scale, 2.2, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  // === LEFT TEXT ===
+  const lx = 52 * scale;
+  ctx.fillStyle = 'rgba(255,255,255,0.72)';
+  ctx.font = `500 ${Math.round(16 * scale)}px Arial`;
+  ctx.fillText('MTHOKOZISI', lx, 135 * scale);
+
+  ctx.fillStyle = '#FFFFFF';
+  ctx.font = `bold ${Math.round(56 * scale)}px Arial`;
+  ctx.fillText('Masombuka', lx, 200 * scale);
+
+  ctx.fillStyle = 'rgba(255,255,255,0.45)';
+  ctx.fillRect(lx, 215 * scale, 80 * scale, 2.5);
+
+  ctx.fillStyle = 'rgba(255,255,255,0.9)';
+  ctx.font = `400 ${Math.round(13 * scale)}px Arial`;
+  ctx.fillText('Business Intelligence  ·  Cloud  ·  AI Enthusiast', lx, 252 * scale);
+
+  ctx.fillStyle = 'rgba(255,255,255,0.62)';
+  ctx.font = `400 ${Math.round(11.5 * scale)}px Arial`;
+  ctx.fillText('Kwa-Thema, Gauteng · 99masombuka@gmail.com', lx, 284 * scale);
+  ctx.fillText('BCom IT & Business Intelligence, Regent Business School 2026', lx, 306 * scale);
+
+  // === RIGHT SIDE ===
+  // Stats
+  const stats = [
+    { val: '22', label: 'LinkedIn Credentials' },
+    { val: '8',  label: 'Distinctions' },
+    { val: '74%',label: 'Weighted GPA' },
+    { val: '3+', label: 'Live Projects' },
+  ];
+
+  let sx = RX;
+  stats.forEach((s, i) => {
+    ctx.fillStyle = '#FF6B35';
+    ctx.font = `bold ${Math.round(32 * scale)}px Arial`;
+    ctx.fillText(s.val, sx, 58 * scale);
+
+    ctx.fillStyle = '#999';
+    ctx.font = `400 ${Math.round(10 * scale)}px Arial`;
+    ctx.fillText(s.label.toUpperCase(), sx, 74 * scale);
+
+    const vw = ctx.measureText(s.val).width;
+    ctx.font = `bold ${Math.round(32 * scale)}px Arial`;
+    const lw2 = ctx.measureText(s.val).width;
+    ctx.font = `400 ${Math.round(10 * scale)}px Arial`;
+    const labelW = ctx.measureText(s.label.toUpperCase()).width;
+    const colW = Math.max(lw2, labelW) + 28 * scale;
+
+    if (i < stats.length - 1) {
+      ctx.fillStyle = '#E8E0DC';
+      ctx.fillRect(sx + colW, 28 * scale, 1.5, 56 * scale);
+    }
+    sx += colW + 14 * scale;
+  });
+
+  // Divider
+  ctx.fillStyle = '#F0E8E4';
+  ctx.fillRect(RX, 92 * scale, W - RX - 40, 1.5);
+
+  // Certs
+  ctx.fillStyle = '#AAA';
+  ctx.font = `600 ${Math.round(9.5 * scale)}px Arial`;
+  ctx.fillText('CERTIFICATIONS', RX, 112 * scale);
+
+  const certs = [
+    { t: 'AWS Cloud Practitioner', dark: true },
+    { t: 'AWS AI Practitioner', dark: true },
+    { t: 'Andela KCNA Track', dark: true },
+    { t: 'AWS re/Start Grad', dark: true },
+    { t: 'Deloitte Digital Literacy', dark: false },
+  ];
+
+  let cx = RX;
+  const pH = Math.round(26 * scale);
+  const pY = Math.round(120 * scale);
+  certs.forEach(cert => {
+    ctx.font = `bold ${Math.round(10 * scale)}px Arial`;
+    const tw = ctx.measureText(cert.t).width;
+    const pw = tw + 22 * scale;
+    pill(ctx, cx, pY, pw, pH, pH / 2, cert.dark ? '#FF6B35' : '#FF9A6C');
+    ctx.fillStyle = '#FFF';
+    ctx.fillText(cert.t, cx + 11 * scale, pY + pH * 0.72);
+    cx += pw + 8 * scale;
+  });
+
+  // Skills
+  ctx.fillStyle = '#AAA';
+  ctx.font = `600 ${Math.round(9.5 * scale)}px Arial`;
+  ctx.fillText('SKILLS & EXPERTISE', RX, 178 * scale);
+
+  const skills = [
+    { t: 'BCom IT & BI', solid: true },
+    { t: 'Power BI', solid: false },
+    { t: 'SQL · Python', solid: false },
+    { t: 'Data Warehousing', solid: false },
+    { t: 'ETL Pipelines', solid: false },
+    { t: 'AWS Cloud', solid: false },
+    { t: 'LangChain · GenAI', solid: false },
+    { t: 'Business Analytics', solid: false },
+  ];
+
+  let tx = RX;
+  const tH = Math.round(25 * scale);
+  const tY = Math.round(186 * scale);
+  skills.forEach(skill => {
+    ctx.font = `bold ${Math.round(10 * scale)}px Arial`;
+    const tw = ctx.measureText(skill.t).width;
+    const pw = tw + 20 * scale;
+    if (tx + pw > W - 30) return;
+    if (skill.solid) {
+      pill(ctx, tx, tY, pw, tH, 4, '#FF6B35');
+      ctx.fillStyle = '#FFF';
+    } else {
+      outlinePill(ctx, tx, tY, pw, tH, 4, '#FF6B35');
+      ctx.fillStyle = '#FF6B35';
+    }
+    ctx.fillText(skill.t, tx + 10 * scale, tY + tH * 0.72);
+    tx += pw + 8 * scale;
+  });
+
+  // Tagline
+  ctx.fillStyle = '#BBB';
+  ctx.font = `400 ${Math.round(11.5 * scale)}px Arial`;
+  ctx.fillText('Turning data into decisions  ·  Open to BI, Analytics & Graduate Programmes', RX, 238 * scale);
+
+  // Extra creds
+  ctx.fillStyle = '#AAA';
+  ctx.font = `600 ${Math.round(9.5 * scale)}px Arial`;
+  ctx.fillText('ADDITIONAL CREDENTIALS', RX, 265 * scale);
+
+  const extra = [
+    'AWS AI & ML Scholars 2026',
+    '10 AWS Educate Badges',
+    'LFS101 Linux Foundation',
+    'Govt Data Analytics Cert',
+  ];
+  let ex = RX;
+  const eH = Math.round(24 * scale);
+  const eY = Math.round(272 * scale);
+  extra.forEach(e => {
+    ctx.font = `400 ${Math.round(10 * scale)}px Arial`;
+    const tw = ctx.measureText(e).width;
+    const pw = tw + 18 * scale;
+    if (ex + pw > W - 30) return;
+    outlinePill(ctx, ex, eY, pw, eH, 3, '#DDCCCC');
+    ctx.fillStyle = '#888';
+    ctx.fillText(e, ex + 9 * scale, eY + eH * 0.72);
+    ex += pw + 7 * scale;
+  });
+
+  // Bottom bar
+  const barGrad = ctx.createLinearGradient(0, 0, W, 0);
+  barGrad.addColorStop(0, '#FF4500');
+  barGrad.addColorStop(0.4, '#FF6B35');
+  barGrad.addColorStop(1, '#FFB085');
+  ctx.fillStyle = barGrad;
+  ctx.fillRect(0, H - 8, W, 8);
+}
+
+function download() {
+  const link = document.createElement('a');
+  const names = {
+    linkedin: 'Banner_LinkedIn',
+    facebook: 'Banner_Facebook',
+    x_header: 'Banner_X_Header',
+    x_profile: 'Banner_X_Profile',
+  };
+  link.download = `Mthokozisi_Masombuka_${names[current]}.png`;
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+}
+
+// Draw default on load
+drawBanner('linkedin');
+</script>
+</body>
+</html>
