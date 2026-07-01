@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Banner Generator</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #1a1a1a;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+    gap: 20px;
+  }
+  canvas {
+    max-width: 100%;
+    height: auto;
+    border-radius: 6px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.6);
+  }
+  button {
+    background: #FF6B35;
+    color: white;
+    border: none;
+    padding: 14px 36px;
+    font-size: 16px;
+    font-weight: 700;
+    border-radius: 30px;
+    cursor: pointer;
+    letter-spacing: 1px;
+  }
+  p { color: #888; font-size: 13px; text-align: center; line-height: 1.8; }
+</style>
+</head>
+<body>
+
+<canvas id="banner"></canvas>
+<button onclick="download()">Download PNG</button>
+<p>1584 × 396 px · LinkedIn / Facebook / X ready</p>
+
+<script>
+const W = 1584, H = 396;
+const canvas = document.getElementById('banner');
+canvas.width = W;
+canvas.height = H;
+const ctx = canvas.getContext('2d');
+
+function draw() {
+  // === BACKGROUND ===
+  ctx.fillStyle = '#FFF8F5';
+  ctx.fillRect(0, 0, W, H);
+
+  // === LEFT CORAL PANEL (diagonal) ===
+  const leftGrad = ctx.createLinearGradient(0, 0, 560, H);
+  leftGrad.addColorStop(0, '#FF7A45');
+  leftGrad.addColorStop(1, '#FF4500');
+  ctx.fillStyle = leftGrad;
+  ctx.beginPath();
+  ctx.moveTo(0, 0);
+  ctx.lineTo(570, 0);
+  ctx.lineTo(630, H);
+  ctx.lineTo(0, H);
+  ctx.closePath();
+  ctx.fill();
+
+  // === DIAGONAL ACCENT STRIPE ===
+  ctx.fillStyle = 'rgba(255,160,100,0.45)';
+  ctx.beginPath();
+  ctx.moveTo(550, 0);
+  ctx.lineTo(595, 0);
+  ctx.lineTo(655, H);
+  ctx.lineTo(610, H);
+  ctx.closePath();
+  ctx.fill();
+
+  // === DECORATIVE CIRCLES (left) ===
+  ctx.beginPath();
+  ctx.arc(55, 355, 130, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(255,255,255,0.07)';
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.arc(490, 28, 85, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(255,255,255,0.07)';
+  ctx.fill();
+
+  // === DOT GRID (left panel) ===
+  ctx.fillStyle = 'rgba(255,255,255,0.18)';
+  for (let row = 0; row < 5; row++) {
+    for (let col = 0; col < 4; col++) {
+      ctx.beginPath();
+      ctx.arc(340 + col * 22, 55 + row * 22, 2.5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  // === LEFT TEXT ===
+  ctx.fillStyle = 'rgba(255,255,255,0.72)';
+  ctx.font = '500 17px Arial';
+  ctx.letterSpacing = '5px';
+  ctx.fillText('MTHOKOZISI', 52, 140);
+
+  ctx.fillStyle = '#FFFFFF';
+  ctx.font = 'bold 62px Arial';
+  ctx.fillText('Masombuka', 52, 208);
+
+  // Underline
+  ctx.fillStyle = 'rgba(255,255,255,0.45)';
+  ctx.fillRect(52, 222, 90, 3);
+
+  ctx.fillStyle = 'rgba(255,255,255,0.9)';
+  ctx.font = '400 15px Arial';
+  ctx.fillText('Business Intelligence  ·  Cloud Engineer  ·  AI Enthusiast', 52, 262);
+
+  ctx.fillStyle = 'rgba(255,255,255,0.62)';
+  ctx.font = '400 13px Arial';
+  ctx.fillText('Kwa-Thema, Gauteng, South Africa', 52, 300);
+  ctx.fillText('99masombuka@gmail.com  ·  webst1r.github.io/MyCv', 52, 322);
+
+  // === RIGHT SIDE ===
+  const RX = 690;
+
+  // --- STATS ROW ---
+  const stats = [
+    { val: '22', label: 'LinkedIn Credentials' },
+    { val: '8', label: 'Distinctions' },
+    { val: '74%', label: 'Weighted GPA' },
+    { val: '3+', label: 'Live Projects' },
+  ];
+  let sx = RX;
+  stats.forEach((s, i) => {
+    ctx.fillStyle = '#FF6B35';
+    ctx.font = 'bold 38px Arial';
+    ctx.fillText(s.val, sx, 58);
+
+    ctx.fillStyle = '#999999';
+    ctx.font = '400 11px Arial';
+    ctx.fillText(s.label.toUpperCase(), sx, 76);
+
+    const valW = ctx.measureText(s.val).width;
+    const labelW = ctx.measureText(s.label.toUpperCase()).width;
+    const colW = Math.max(valW, labelW) + 32;
+
+    if (i < stats.length - 1) {
+      ctx.fillStyle = '#E8E0DC';
+      ctx.fillRect(sx + colW, 30, 1.5, 58);
+    }
+    sx += colW + 16;
+  });
+
+  // --- DIVIDER ---
+  ctx.fillStyle = '#F0E8E4';
+  ctx.fillRect(RX, 96, W - RX - 44, 1.5);
+
+  // --- CERTIFICATIONS ---
+  ctx.fillStyle = '#AAAAAA';
+  ctx.font = '600 10px Arial';
+  ctx.fillText('CERTIFICATIONS', RX, 122);
+
+  const certs = [
+    'AWS Cloud Practitioner',
+    'AWS AI Practitioner',
+    'Andela KCNA Track',
+    'AWS re/Start Grad',
+    'Deloitte Digital Literacy',
+  ];
+
+  let cx = RX;
+  const pillH = 30, pillR = 15, pillY = 130;
+  certs.forEach((cert, i) => {
+    ctx.font = 'bold 11px Arial';
+    const tw = ctx.measureText(cert).width;
+    const pw = tw + 28;
+    const fill = i < 4 ? '#FF6B35' : '#FF9A6C';
+
+    // Pill background
+    ctx.fillStyle = fill;
+    ctx.beginPath();
+    ctx.moveTo(cx + pillR, pillY);
+    ctx.arcTo(cx + pw, pillY, cx + pw, pillY + pillH, pillR);
+    ctx.arcTo(cx + pw, pillY + pillH, cx, pillY + pillH, pillR);
+    ctx.arcTo(cx, pillY + pillH, cx, pillY, pillR);
+    ctx.arcTo(cx, pillY, cx + pw, pillY, pillR);
+    ctx.closePath();
+    ctx.fill();
+
+    // Pill text
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillText(cert, cx + 14, pillY + 20);
+
+    cx += pw + 10;
+  });
+
+  // --- SKILLS ---
+  ctx.fillStyle = '#AAAAAA';
+  ctx.font = '600 10px Arial';
+  ctx.fillText('SKILLS & EXPERTISE', RX, 192);
+
+  const skills = [
+    { text: 'BCom IT & BI', solid: true },
+    { text: 'Power BI', solid: false },
+    { text: 'SQL · Python', solid: false },
+    { text: 'Data Warehousing', solid: false },
+    { text: 'ETL Pipelines', solid: false },
+    { text: 'AWS Cloud', solid: false },
+    { text: 'LangChain · GenAI', solid: false },
+    { text: 'Business Analytics', solid: false },
+  ];
+
+  let tx = RX;
+  const tagH = 28, tagY = 200;
+  skills.forEach(skill => {
+    ctx.font = 'bold 11px Arial';
+    const tw = ctx.measureText(skill.text).width;
+    const pw = tw + 24;
+
+    if (skill.solid) {
+      ctx.fillStyle = '#FF6B35';
+      ctx.beginPath();
+      ctx.roundRect(tx, tagY, pw, tagH, 4);
+      ctx.fill();
+      ctx.fillStyle = '#FFFFFF';
+    } else {
+      ctx.strokeStyle = '#FF6B35';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.roundRect(tx, tagY, pw, tagH, 4);
+      ctx.stroke();
+      ctx.fillStyle = '#FF6B35';
+    }
+    ctx.fillText(skill.text, tx + 12, tagY + 19);
+    tx += pw + 10;
+  });
+
+  // --- TAGLINE ---
+  ctx.fillStyle = '#BBBBBB';
+  ctx.font = '400 13px Arial';
+  ctx.fillText('Turning data into decisions  ·  Open to BI, Analytics & Graduate Programmes', RX, 258);
+
+  // --- EXTRA CREDS ROW ---
+  ctx.fillStyle = '#AAAAAA';
+  ctx.font = '600 10px Arial';
+  ctx.fillText('ADDITIONAL CREDENTIALS', RX, 292);
+
+  const extra = [
+    'AWS AI & ML Scholars 2026',
+    '10 AWS Educate Badges',
+    'LFS101 Linux Foundation',
+    'Govt Data Analytics Cert',
+    'AWS PartyRock Badge',
+  ];
+  let ex = RX;
+  extra.forEach(e => {
+    ctx.font = '400 11px Arial';
+    const tw = ctx.measureText(e).width;
+    const pw = tw + 20;
+
+    ctx.strokeStyle = '#DDCCCC';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.roundRect(ex, 300, pw, 26, 3);
+    ctx.stroke();
+
+    ctx.fillStyle = '#888888';
+    ctx.fillText(e, ex + 10, 318);
+    ex += pw + 8;
+  });
+
+  // === BOTTOM ACCENT BAR ===
+  const barGrad = ctx.createLinearGradient(0, 0, W, 0);
+  barGrad.addColorStop(0, '#FF4500');
+  barGrad.addColorStop(0.4, '#FF6B35');
+  barGrad.addColorStop(1, '#FFB085');
+  ctx.fillStyle = barGrad;
+  ctx.fillRect(0, H - 8, W, 8);
+}
+
+draw();
+
+function download() {
+  const link = document.createElement('a');
+  link.download = 'Mthokozisi_Masombuka_Cover_Banner.png';
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+}
+</script>
+</body>
+</html>
